@@ -1,0 +1,6 @@
+@CineTupAPI_HostAddress = http://localhost:5051
+
+GET {{CineTupAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
