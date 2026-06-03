@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>8683c379-d6b0-416f-90f0-5faa387c1da9</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CineTup.Application\CineTup.Application.csproj" />
+    <ProjectReference Include="..\CineTup.Infraestucture\CineTup.Infraestucture.csproj" />
   </ItemGroup>
 
 </Project>

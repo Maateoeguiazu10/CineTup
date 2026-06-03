@@ -8,6 +8,11 @@ namespace CineTup.Application.Services
 {
     public class UserService : IUserService
     {
+        private readonly IUserRepository _userRepository;
+        public UserService(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
         private static readonly List<User> _users = new()
         {
             new User
@@ -20,6 +25,7 @@ namespace CineTup.Application.Services
         };
         public List<UserResponse> GetAll()
         {
+            var users = _userRepository.GetAll();
             return _users
                 .Where(x => x.IsDeleted == false)
                 .OrderBy(x => x.Name)

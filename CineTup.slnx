@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="CineTup.Application/CineTup.Application.csproj" />
   <Project Path="CineTup.Domain/CineTup.Domain.csproj" />
+  <Project Path="CineTup.Infraestucture/CineTup.Infraestucture.csproj" Id="108e358f-be10-43b2-8fcd-451969a56833" />
   <Project Path="CineTup.Presentation/CineTup.Presentation.csproj" />
 </Solution>
