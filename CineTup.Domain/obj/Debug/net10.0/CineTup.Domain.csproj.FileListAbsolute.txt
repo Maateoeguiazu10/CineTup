@@ -9,3 +9,4 @@ C:\Users\Mateito\source\repos\CineTup.Domain\obj\Debug\net10.0\CineTup.Domain.dl
 C:\Users\Mateito\source\repos\CineTup.Domain\obj\Debug\net10.0\refint\CineTup.Domain.dll
 C:\Users\Mateito\source\repos\CineTup.Domain\obj\Debug\net10.0\CineTup.Domain.pdb
 C:\Users\Mateito\source\repos\CineTup.Domain\obj\Debug\net10.0\ref\CineTup.Domain.dll
+C:\Users\Mateito\source\repos\CineTup.Domain\obj\Debug\net10.0\CineTup.Domain.sourcelink.json

@@ -13,3 +13,4 @@ C:\Users\Mateito\source\repos\CineTup.Application\obj\Debug\net10.0\CineTup.Appl
 C:\Users\Mateito\source\repos\CineTup.Application\obj\Debug\net10.0\refint\CineTup.Application.dll
 C:\Users\Mateito\source\repos\CineTup.Application\obj\Debug\net10.0\CineTup.Application.pdb
 C:\Users\Mateito\source\repos\CineTup.Application\obj\Debug\net10.0\ref\CineTup.Application.dll
+C:\Users\Mateito\source\repos\CineTup.Application\obj\Debug\net10.0\CineTup.Application.sourcelink.json

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CineTup.Application/CineTup.Application.csproj" />
+  <Project Path="CineTup.Domain/CineTup.Domain.csproj" />
+  <Project Path="CineTup.Presentation/CineTup.Presentation.csproj" />
+</Solution>
