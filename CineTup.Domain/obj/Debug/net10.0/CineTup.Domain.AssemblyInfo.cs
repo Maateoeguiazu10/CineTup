@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CineTup.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da23ba4b127a8f90f9a91ce5a1300635340d51cf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e12b6698a76b9a391f7e4dbc9532db43a52dc056")]
 [assembly: System.Reflection.AssemblyProductAttribute("CineTup.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CineTup.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

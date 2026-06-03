@@ -25,7 +25,7 @@ namespace CineTup.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<UserResponse> GetById([FromRoute] Guid id)
+        public ActionResult<UserResponse> GetById([FromRoute] int id)
         {
             var user = _userService.GetById(id);
 
@@ -44,7 +44,7 @@ namespace CineTup.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] Guid id)
+        public ActionResult Delete([FromRoute] int id)
         {
             var createdUser = _userService.Delete(id);
 
@@ -55,7 +55,7 @@ namespace CineTup.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Update([FromBody] UserRequest user, [FromRoute] Guid id)
+        public ActionResult Update([FromBody] UserRequest user, [FromRoute] int id)
         {
             var updatedUser = _userService.Update(user, id);
 

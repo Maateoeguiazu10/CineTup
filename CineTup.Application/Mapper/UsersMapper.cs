@@ -20,7 +20,6 @@ namespace CineTup.Application.Mapper
         {
             return new User
             {
-                Id = Guid.NewGuid(),
                 Name = userRequest.Name,
                 Email = userRequest.Email,
                 Password = userRequest.Password,

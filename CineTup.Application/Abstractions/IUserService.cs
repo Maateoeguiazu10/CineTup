@@ -8,9 +8,9 @@ namespace CineTup.Application.Abstractions
     public interface IUserService
     {
         List<UserResponse> GetAll();
-        UserResponse? GetById(Guid id);
+        UserResponse? GetById(int id);
         UserResponse Create(UserRequest user);
-        bool Update(UserRequest user, Guid id);
-        bool Delete(Guid id);
+        bool Update(UserRequest user, int id);
+        bool Delete(int id);
     }
 }

@@ -12,7 +12,7 @@ namespace CineTup.Application.Services
         {
             new User
             {
-                Id = Guid.NewGuid(),
+                Id = 1,
                 Name = "John Doe",
                 Email = "john@gmail.com",
                 Password = "123"
@@ -27,7 +27,7 @@ namespace CineTup.Application.Services
 
         }
 
-        public UserResponse? GetById(Guid id)
+        public UserResponse? GetById(int id)
         {
             return _users
                 .Where(x => x.Id == id)
@@ -38,11 +38,14 @@ namespace CineTup.Application.Services
         public UserResponse Create(UserRequest user)
         {
             var newUser = user.ToUser();
+            newUser.Id = _users.Any()
+            ? _users.Max(x => x.Id) + 1
+            : 1;
             _users.Add(newUser);
             return newUser.ToUserResponse();
         }
 
-        public bool Delete(Guid id)
+        public bool Delete(int id)
         {
 
             var UserToDelete = _users.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
@@ -54,7 +57,7 @@ namespace CineTup.Application.Services
 
             return true;
         }
-        public bool Update(UserRequest user, Guid id)
+        public bool Update(UserRequest user, int id)
         {
             var userToUpdate = _users.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
 
