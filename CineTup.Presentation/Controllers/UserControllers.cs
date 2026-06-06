@@ -21,7 +21,10 @@ namespace CineTup.Presentation.Controllers
         [HttpGet]
         public ActionResult<UserResponse> GetAll()
         {
-            return Ok(_userService.GetAll());
+           var users = _userService.GetAll();
+            if (!users.Any())
+                return NotFound();
+            return Ok(users);
         }
 
         [HttpGet("{id}")]
