@@ -6,15 +6,11 @@ using System.Text;
 
 namespace CineTup.Domain.Entities
 {
-    public class User
+    public class User : BaseEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public bool IsDeleted { get; set; } = false;
 
 
     }

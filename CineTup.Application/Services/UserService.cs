@@ -1,4 +1,5 @@
 ﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Abstractions.Infraestructure;
 using CineTup.Application.Mapper;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
@@ -13,21 +14,10 @@ namespace CineTup.Application.Services
         {
             _userRepository = userRepository;
         }
-        private static readonly List<User> _users = new()
-        {
-            new User
-            {
-                Id = 1,
-                Name = "John Doe",
-                Email = "john@gmail.com",
-                Password = "123"
-            }
-        };
         public List<UserResponse> GetAll()
         {
-            var users = _userRepository.GetAll();
-            return _users
-                .Where(x => x.IsDeleted == false)
+                return _userRepository 
+                .GetAll()
                 .OrderBy(x => x.Name)
                 .Select(x => x.ToUserResponse()).ToList();
 
@@ -35,37 +25,25 @@ namespace CineTup.Application.Services
 
         public UserResponse? GetById(int id)
         {
-            return _users
-                .Where(x => x.Id == id)
-                .Select(x => x.ToUserResponse())
-                .FirstOrDefault();
+            return _userRepository.GetById(id)?.ToUserResponse();
+
         }
 
         public UserResponse Create(UserRequest user)
         {
             var newUser = user.ToUser();
-            newUser.Id = _users.Any()
-            ? _users.Max(x => x.Id) + 1
-            : 1;
-            _users.Add(newUser);
+            _userRepository.Add(newUser);
             return newUser.ToUserResponse();
         }
 
         public bool Delete(int id)
         {
-
-            var UserToDelete = _users.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
-
-            if (UserToDelete == null)
-                return false;
-
-            UserToDelete.IsDeleted = true;
-
+            _userRepository.Delete(id);
             return true;
         }
         public bool Update(UserRequest user, int id)
         {
-            var userToUpdate = _users.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
+            var userToUpdate = _userRepository.GetById(id);
 
             if (userToUpdate == null)
                 return false;
@@ -74,6 +52,7 @@ namespace CineTup.Application.Services
             userToUpdate.Email = user.Email;
             userToUpdate.Password = user.Password;
 
+            _userRepository.Update(userToUpdate);
             return true;
         }
     }

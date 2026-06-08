@@ -1,13 +1,14 @@
-﻿using CineTup.Application.Abstractions;
+﻿using CineTup.Application.Abstractions.Infraestructure;
+using CineTup.Domain.Entities;
 using CineTup.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CineTup.Infraestucture.Repository
+namespace CineTup.Infraestucture.Persistence.Repository
 {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class
+    public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
     {
         protected readonly CineTupDbContext _context;
         protected readonly DbSet<T> _dbSet;
@@ -20,16 +21,17 @@ namespace CineTup.Infraestucture.Repository
 
         public virtual List<T> GetAll()
         {
-            return _dbSet.ToList();
+            return _dbSet.Where(x => !x.IsDeleted).ToList();
         }
 
         public virtual T? GetById(int id)
         {
-            return _dbSet.Find(id);
+            return _dbSet.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
         }
 
         public virtual T Add(T entity)
         {
+            entity.UpdateDateTime = DateTime.UtcNow;
             _dbSet.Add(entity);
             _context.SaveChanges();
             return entity;
@@ -37,6 +39,7 @@ namespace CineTup.Infraestucture.Repository
 
         public virtual void Update(T entity)
         {
+            entity.UpdateDateTime = DateTime.UtcNow;
             _dbSet.Update(entity);
             _context.SaveChanges();
         }
@@ -46,8 +49,13 @@ namespace CineTup.Infraestucture.Repository
             var entity = GetById(id);
             if (entity != null)
             {
-                _dbSet.Remove(entity);
-                _context.SaveChanges();
+               entity.IsDeleted = true;
+               entity.DeletedDateTime = DateTime.UtcNow;
+               entity.UpdateDateTime = DateTime.UtcNow;
+               _dbSet.Update(entity);
+               _context.SaveChanges();
+
+                
             }
         }
     }
