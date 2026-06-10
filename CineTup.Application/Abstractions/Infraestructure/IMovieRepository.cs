@@ -1,11 +1,11 @@
-﻿using CineTup.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CineTup.Domain.Entities;
 
 namespace CineTup.Application.Abstractions.Infraestructure
 {
-    public interface IUserRepository : IBaseRepository<User>
+    public interface IMovieRepository : IBaseRepository<Movie>
     {
     }
 }

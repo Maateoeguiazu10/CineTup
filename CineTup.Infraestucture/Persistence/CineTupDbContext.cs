@@ -8,7 +8,7 @@ namespace CineTup.Infrastructure.Persistance
 {
     public class CineTupDbContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
+        public DbSet<Movie> Movies { get; set; }
 
         public CineTupDbContext(DbContextOptions<CineTupDbContext> options) : base(options)
         {
