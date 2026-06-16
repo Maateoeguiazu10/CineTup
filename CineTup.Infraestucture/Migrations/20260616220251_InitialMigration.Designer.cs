@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CineTup.Infraestucture.Migrations
 {
     [DbContext(typeof(CineTupDbContext))]
-    [Migration("20260610003555_InitialMigration")]
+    [Migration("20260616220251_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
