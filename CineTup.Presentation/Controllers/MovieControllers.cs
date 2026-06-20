@@ -1,10 +1,12 @@
 ﻿using CineTup.Application.Abstractions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineTup.Presentation.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MovieController : ControllerBase

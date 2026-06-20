@@ -9,6 +9,11 @@ namespace CineTup.Infrastructure.Persistance
     public class CineTupDbContext : DbContext
     {
         public DbSet<Movie> Movies { get; set; }
+        public DbSet<ShowTime> ShowTimes { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<Admin> Admins { get; set; }
+        public DbSet<Client> Clients { get; set; }
+        public DbSet<SysAdmin> SysAdmins { get; set; }
 
         public CineTupDbContext(DbContextOptions<CineTupDbContext> options) : base(options)
         {
@@ -18,6 +23,12 @@ namespace CineTup.Infrastructure.Persistance
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>().UseTpcMappingStrategy();
+
+            modelBuilder.Entity<ShowTime>()
+                .Property(st => st.TicketPrice)
+                .HasPrecision(18, 2);
         }
     }
 }

@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CineTup.Domain.Entities
+namespace CineTup.Application.Requests
 {
-    public class ShowTime : BaseEntity
+    public class ShowTimeRequest
     {
         public int MovieId { get; set; }
-        public Movie Movie { get; set; } = null!;
         public DateTime StartTime { get; set; }
         public decimal TicketPrice { get; set; }
-        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }
 }

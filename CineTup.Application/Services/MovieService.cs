@@ -65,7 +65,6 @@ namespace CineTup.Application.Services
             movieToUpdate.Duration = movie.Duration;
             movieToUpdate.Language = movie.Language;
             movieToUpdate.IsAvailable = movie.IsAvailable;
-            movieToUpdate.ShowTime = movie.ShowTime;
 
 
             _movieRepository.Update(movieToUpdate);

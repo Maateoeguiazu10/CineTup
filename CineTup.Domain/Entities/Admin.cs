@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CineTup.Domain.Entities
 {
-    internal class Admin
+    public class Admin : User
     {
     }
 }

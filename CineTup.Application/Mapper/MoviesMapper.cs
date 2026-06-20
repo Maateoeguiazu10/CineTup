@@ -20,7 +20,6 @@ namespace CineTup.Application.Mapper
                 Duration = movie.Duration,
                 Language = movie.Language,
                 IsAvailable = movie.IsAvailable,
-                ShowTime = movie.ShowTime
             };
         }
 
@@ -37,7 +36,6 @@ namespace CineTup.Application.Mapper
                 Duration = movieRequest.Duration,
                 Language = movieRequest.Language,
                 IsAvailable = movieRequest.IsAvailable,
-                ShowTime = movieRequest.ShowTime,
                 IsDeleted = false
             };
         }

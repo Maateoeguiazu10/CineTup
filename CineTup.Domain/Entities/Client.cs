@@ -4,7 +4,8 @@ using System.Text;
 
 namespace CineTup.Domain.Entities
 {
-    internal class Client
+    public class Client : User
     {
+        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }
 }
