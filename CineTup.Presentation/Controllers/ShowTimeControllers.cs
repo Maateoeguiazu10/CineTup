@@ -1,6 +1,10 @@
 ﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Exceptions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
+using CineTup.Application.Services;
+using CineTup.Domain.Entities;
+using CineTup.Presentation.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,58 +25,89 @@ namespace CineTup.Presentation.Controllers
         [HttpGet]
         public ActionResult<ShowTimeResponse> GetAll()
         {
-            var showTimes = _showTimeService.GetAll();
-
-            if (!showTimes.Any())
-                return NotFound();
-
-            return Ok(showTimes);
+            try
+            {
+                var showTimes = _showTimeService.GetAll();
+                if (!showTimes.Any())
+                    return NotFound("No se encontraron funciones.");
+                return Ok(showTimes);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public ActionResult<ShowTimeResponse> GetById([FromRoute] int id)
         {
-            var showTime = _showTimeService.GetById(id);
-
-            if (showTime == null)
-                return NotFound();
-
-            return Ok(showTime);
+            try
+            {
+                return Ok(_showTimeService.GetById(id));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            } 
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpPost]
         public ActionResult<ShowTimeResponse> Create([FromBody] ShowTimeRequest showTime)
         {
-            var createdShowTime = _showTimeService.Create(showTime);
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = createdShowTime.Id },
-                createdShowTime);
+            try
+            {
+                var createdShowTime = _showTimeService.Create(showTime);
+                return CreatedAtAction(nameof(GetById), new { id = createdShowTime.Id }, createdShowTime);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
-
+        
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-            var deleted = _showTimeService.Delete(id);
-
-            if (!deleted)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                _showTimeService.Delete(id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpPut("{id}")]
         public ActionResult Update(
             [FromBody] ShowTimeRequest showTime,
             [FromRoute] int id)
         {
-            var updated = _showTimeService.Update(showTime, id);
-
-            if (!updated)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                _showTimeService.Update(showTime, id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

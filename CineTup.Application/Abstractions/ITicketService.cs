@@ -8,7 +8,7 @@ namespace CineTup.Application.Abstractions
     public interface ITicketService
     {
         List<TicketResponse> GetAll();
-        TicketResponse? GetById(int id);
-        bool Delete(int id);
+        TicketResponse GetById(int id);
+        void Delete(int id);
     }
 }

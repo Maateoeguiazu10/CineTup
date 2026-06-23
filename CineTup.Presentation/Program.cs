@@ -1,4 +1,5 @@
 ﻿using CineTup.Application.Abstractions;
+using CineTup.Presentation.Authorization;
 using CineTup.Application.Abstractions.Infraestructure;
 using CineTup.Application.Services;
 using CineTup.Infraestucture.ExternalServices;
@@ -52,6 +53,13 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("Admin"));
+    options.AddPolicy(Policies.ClientOnly, policy => policy.RequireRole("Client"));
+    options.AddPolicy(Policies.SysAdminOnly, policy => policy.RequireRole("SysAdmin"));
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

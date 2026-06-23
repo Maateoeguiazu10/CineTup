@@ -1,8 +1,10 @@
 ﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Exceptions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
 using CineTup.Domain.Entities;
 using CineTup.Infrastructure.Persistance;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +13,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CineTup.Infraestucture.ExternalServices
 {
@@ -23,19 +26,23 @@ namespace CineTup.Infraestucture.ExternalServices
             _context = context;
             _configuration = configuration;
         }
-        public AuthResponse? SingUp(SignUpRequest request)
+        public AuthResponse SingUp(SignUpRequest request)
         {
+            if (!Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                throw new ArgumentException($"El email '{request.Email}' no es válido.");
+            }
             bool emailExists = _context.Clients.Any(c => c.Email == request.Email)
                            || _context.Admins.Any(a => a.Email == request.Email)
                            || _context.SysAdmins.Any(u => u.Email == request.Email);
             if (emailExists)
             {
-                return null;
+                throw new ConflictException($"El email '{request.Email}' ya está registrado.");
             }
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            User user;
             string rol;
-            int userId;
 
             if (request.Rol == "Admin")
             {
@@ -45,10 +52,8 @@ namespace CineTup.Infraestucture.ExternalServices
                     Email = request.Email,
                     Password = hashedPassword
                 };
+                user = admin;
                 _context.Admins.Add(admin);
-                _context.SaveChanges();
-
-                userId = admin.Id;
                 rol = "Admin";
             }
             else if (request.Rol == "Client")
@@ -59,9 +64,8 @@ namespace CineTup.Infraestucture.ExternalServices
                     Email = request.Email,
                     Password = hashedPassword
                 };
+                user = client;
                 _context.Clients.Add(client);
-                _context.SaveChanges();
-                userId = client.Id;
                 rol = "Client";
             }
             else
@@ -72,11 +76,19 @@ namespace CineTup.Infraestucture.ExternalServices
                     Email = request.Email,
                     Password = hashedPassword
                 };
+                user = sysAdmin;
                 _context.SysAdmins.Add(sysAdmin);
-                _context.SaveChanges();
-                userId = sysAdmin.Id;
                 rol = "SysAdmin";
             }
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (DbUpdateException ex) {
+                throw new DatabaseException("Error al guardar los datos en la base de datos.", 
+                    ex);
+            }
+            int userId = user.Id;
 
             return new AuthResponse
             {
@@ -86,16 +98,17 @@ namespace CineTup.Infraestucture.ExternalServices
                 Email = request.Email
             };
         }
-        public AuthResponse? SingIn(SignInRequest request)
+        public AuthResponse SingIn(SignInRequest request)
         {
             int userId;
             string rol;
+
             var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
             if (client != null)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
                 {
-                    return null;
+                    throw new UnauthorizedAccessException("Credenciales inválidas.");
                 }
                 userId = client.Id;
                 rol = "Client";
@@ -107,7 +120,7 @@ namespace CineTup.Infraestucture.ExternalServices
                 {
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, admin.Password))
                     {
-                        return null;
+                        throw new UnauthorizedAccessException("Credenciales inválidas.");
                     }
                     userId = admin.Id;
                     rol = "Admin";
@@ -120,16 +133,15 @@ namespace CineTup.Infraestucture.ExternalServices
                     {
                         if (!BCrypt.Net.BCrypt.Verify(request.Password, sysAdmin.Password))
                         {
-                            return null;
+                            throw new UnauthorizedAccessException("Credenciales inválidas.");
                         }
                         userId = sysAdmin.Id;
                         rol = "SysAdmin";
                     }
                     else
                     {
-                        return null;
+                        throw new UnauthorizedAccessException("Credenciales inválidas.");
                     }
-
                 }
             }
             return new AuthResponse

@@ -1,4 +1,5 @@
 ﻿using CineTup.Application.Abstractions.Infraestructure;
+using CineTup.Application.Exceptions;
 using CineTup.Domain.Entities;
 using CineTup.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace CineTup.Infraestucture.Persistence.Repository
         {
             entity.UpdateDateTime = DateTime.UtcNow;
             _dbSet.Add(entity);
-            _context.SaveChanges();
+            SaveChanges();
             return entity;
         }
 
@@ -41,7 +42,7 @@ namespace CineTup.Infraestucture.Persistence.Repository
         {
             entity.UpdateDateTime = DateTime.UtcNow;
             _dbSet.Update(entity);
-            _context.SaveChanges();
+            SaveChanges();
         }
 
         public virtual void Delete(int id)
@@ -53,11 +54,21 @@ namespace CineTup.Infraestucture.Persistence.Repository
                entity.DeletedDateTime = DateTime.UtcNow;
                entity.UpdateDateTime = DateTime.UtcNow;
                _dbSet.Update(entity);
-               _context.SaveChanges();
+               SaveChanges();
 
                 
             }
         }
-    }
+        protected void SaveChanges()
+        {
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new DatabaseException("Error al acceder a la base de datos.", ex);
+            }
+        }
 }
 

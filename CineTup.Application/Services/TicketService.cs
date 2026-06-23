@@ -1,5 +1,6 @@
 ﻿using CineTup.Application.Abstractions;
 using CineTup.Application.Abstractions.Infraestructure;
+using CineTup.Application.Exceptions;
 using CineTup.Application.Mapper;
 using CineTup.Application.Responses;
 using System;
@@ -24,23 +25,24 @@ namespace CineTup.Application.Services
                 .ToList();
         }
 
-        public TicketResponse? GetById(int id)
+        public TicketResponse GetById(int id)
         {
-            return _ticketRepository
-                .GetById(id)?
-                .ToTicketResponse();
+            var ticket = _ticketRepository.GetById(id);
+            if (ticket == null)
+                throw new NotFoundException("Ticket not found");
+            return ticket.ToTicketResponse();
         }
 
-        public bool Delete(int id)
+        public void Delete(int id)
         {
             var ticket = _ticketRepository.GetById(id);
 
             if (ticket == null)
-                return false;
+                throw new NotFoundException("Ticket not found");
+
 
             _ticketRepository.Delete(id);
 
-            return true;
         }
     }
 }

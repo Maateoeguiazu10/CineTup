@@ -12,6 +12,6 @@ namespace CineTup.Domain.Entities
         public int Id { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime UpdateDateTime { get; set; }
-        public DateTime DeletedDateTime { get; set; }
+        public DateTime? DeletedDateTime { get; set; }
     }
 }

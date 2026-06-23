@@ -1,5 +1,6 @@
 ﻿using CineTup.Application.Abstractions;
 using CineTup.Application.Abstractions.Infraestructure;
+using CineTup.Application.Exceptions;
 using CineTup.Application.Mapper;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
@@ -29,11 +30,12 @@ namespace CineTup.Application.Services
                 .ToList();
         }
 
-        public ShowTimeResponse? GetById(int id)
+        public ShowTimeResponse GetById(int id)
         {
-            return _showTimeRepository
-                .GetById(id)?
-                .ToShowTimeResponse();
+            var showTime = _showTimeRepository.GetById(id);
+            if (showTime == null)
+                throw new NotFoundException("No se encontro la funcion con id '{id}'");
+            return showTime.ToShowTimeResponse();
         }
 
         public ShowTimeResponse Create(ShowTimeRequest request)
@@ -55,32 +57,28 @@ namespace CineTup.Application.Services
             return newShowTime.ToShowTimeResponse();
         }
 
-        public bool Update(ShowTimeRequest request, int id)
+        public void Update(ShowTimeRequest request, int id)
         {
             var showTimeToUpdate = _showTimeRepository.GetById(id);
 
             if (showTimeToUpdate == null)
-                return false;
+                throw new NotFoundException("No se encontro la funcion con id '{id}'");
 
             showTimeToUpdate.MovieId = request.MovieId;
             showTimeToUpdate.StartTime = request.StartTime;
             showTimeToUpdate.TicketPrice = request.TicketPrice;
 
             _showTimeRepository.Update(showTimeToUpdate);
-
-            return true;
         }
 
-        public bool Delete(int id)
+        public void Delete(int id)
         {
             var showTime = _showTimeRepository.GetById(id);
 
             if (showTime == null)
-                return false;
+                throw new NotFoundException("No se encontro la funcion con id '{id}'");
 
             _showTimeRepository.Delete(id);
-
-            return true;
         }
     }
 }

@@ -6,6 +6,8 @@ using CineTup.Application.Abstractions.Infraestructure;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
 using CineTup.Application.Mapper;
+using CineTup.Domain.Entities;
+using CineTup.Application.Exceptions;
 
 namespace CineTup.Application.Services
 {
@@ -25,10 +27,12 @@ namespace CineTup.Application.Services
 
         }
 
-        public MovieResponse? GetById(int id)
+        public MovieResponse GetById(int id)
         {
-            return _movieRepository.GetById(id)?.ToMovieResponse();
-
+            var movie = _movieRepository.GetById(id);
+            if (movie == null) 
+                throw new NotFoundException("Movie not found");
+            return movie.ToMovieResponse();
         }
 
         public MovieResponse Create(MovieRequest movie)
@@ -38,23 +42,22 @@ namespace CineTup.Application.Services
             return newMovie.ToMovieResponse();
         }
 
-        public bool Delete(int id)
+        public void Delete(int id)
         {
             var movie = _movieRepository.GetById(id);
 
             if (movie == null)
-                return false;
+                throw new NotFoundException("No se encontro la pelicula con id '{id}'");
 
             _movieRepository.Delete(id);
-
-            return true;
         }
-        public bool Update(MovieRequest movie, int id)
+        public void Update(MovieRequest movie, int id)
         {
             var movieToUpdate = _movieRepository.GetById(id);
 
             if (movieToUpdate == null)
-                return false;
+                throw new NotFoundException("No se encontro la pelicula con id '{id}'");
+
 
             movieToUpdate.Title = movie.Title;
             movieToUpdate.Director = movie.Director;
@@ -68,7 +71,6 @@ namespace CineTup.Application.Services
 
 
             _movieRepository.Update(movieToUpdate);
-            return true;
         }
     }
 }

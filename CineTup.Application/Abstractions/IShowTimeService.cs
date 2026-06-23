@@ -6,9 +6,9 @@ namespace CineTup.Application.Abstractions
     public interface IShowTimeService
     {
         List<ShowTimeResponse> GetAll();
-        ShowTimeResponse? GetById(int id);
+        ShowTimeResponse GetById(int id);
         ShowTimeResponse Create(ShowTimeRequest request);
-        bool Update(ShowTimeRequest request, int id);
-        bool Delete(int id);
+        void Update(ShowTimeRequest request, int id);
+        void Delete(int id);
     }
 }

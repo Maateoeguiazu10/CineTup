@@ -1,6 +1,8 @@
 ﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Exceptions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
+using CineTup.Presentation.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,53 +21,89 @@ namespace CineTup.Presentation.Controllers
         }
 
         [HttpGet]
-        public ActionResult<MovieResponse> GetAll()
+        public ActionResult<List<MovieResponse>> GetAll()
         {
-            var movies = _movieService.GetAll();
-            if (!movies.Any())
-                return NotFound();
-            return Ok(movies);
+            try
+            {
+                var movies = _movieService.GetAll();
+                if (!movies.Any())
+                    return NotFound("No se encontraron películas.");
+                return Ok(movies);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public ActionResult<MovieResponse> GetById([FromRoute] int id)
         {
-            var movie = _movieService.GetById(id);
-
-            if (movie == null)
-                return NotFound();
-
-            return Ok(movie);
+            try
+            {
+                return Ok(_movieService.GetById(id));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpPost]
         public ActionResult<MovieResponse> Create([FromBody] MovieRequest movie)
         {
-            var createdMovie = _movieService.Create(movie);
-
-            return CreatedAtAction(nameof(GetById), new { id = createdMovie.Id }, createdMovie);
+            try
+            {
+                var createdMovie = _movieService.Create(movie);
+                return CreatedAtAction(nameof(GetById), new { id = createdMovie.Id }, createdMovie);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-            var createdMovie = _movieService.Delete(id);
-
-            if (!createdMovie)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                _movieService.Delete(id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpPut("{id}")]
         public ActionResult Update([FromBody] MovieRequest movie, [FromRoute] int id)
         {
-            var updatedMovie = _movieService.Update(movie, id);
-
-            if (!updatedMovie)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                _movieService.Update(movie, id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
         }
     }
-}
