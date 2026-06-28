@@ -1,4 +1,4 @@
-﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Abstractions;
 using CineTup.Application.Exceptions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
@@ -44,31 +44,10 @@ namespace CineTup.Infraestucture.ExternalServices
             User user;
             string rol;
 
-            if (request.Rol == "Admin")
-            {
-                var admin = new Admin
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Password = hashedPassword
-                };
-                user = admin;
-                _context.Admins.Add(admin);
-                rol = "Admin";
-            }
-            else if (request.Rol == "Client")
-            {
-                var client = new Client
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Password = hashedPassword
-                };
-                user = client;
-                _context.Clients.Add(client);
-                rol = "Client";
-            }
-            else
+            // Restricción de seguridad: los registros públicos por defecto crean "Client".
+            // Para inicializar el sistema, si no existe ningún SysAdmin en la DB, se permite crear el primero.
+            bool hasSysAdmins = _context.SysAdmins.Any();
+            if (!hasSysAdmins && request.Rol == "SysAdmin")
             {
                 var sysAdmin = new SysAdmin
                 {
@@ -79,6 +58,18 @@ namespace CineTup.Infraestucture.ExternalServices
                 user = sysAdmin;
                 _context.SysAdmins.Add(sysAdmin);
                 rol = "SysAdmin";
+            }
+            else
+            {
+                var client = new Client
+                {
+                    Name = request.Name,
+                    Email = request.Email,
+                    Password = hashedPassword
+                };
+                user = client;
+                _context.Clients.Add(client);
+                rol = "Client";
             }
             try
             {

@@ -1,34 +1,36 @@
-﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Abstractions;
 using CineTup.Application.Exceptions;
-using CineTup.Application.Requests;
 using CineTup.Application.Responses;
 using CineTup.Presentation.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CineTup.Presentation.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class MovieController : ControllerBase
+    public class TicketController : ControllerBase
     {
-        private readonly IMovieService _movieService;
-
-        public MovieController(IMovieService movieService)
+        private readonly ITicketService _ticketService;
+        public TicketController(ITicketService ticketService)
         {
-            _movieService = movieService;
+            _ticketService = ticketService;
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpGet]
-        public ActionResult<List<MovieResponse>> GetAll()
+        public ActionResult<List<TicketResponse>> GetAll()
         {
             try
             {
-                var movies = _movieService.GetAll();
-                if (!movies.Any())
-                    return NotFound("No se encontraron películas.");
-                return Ok(movies);
+                var tickets = _ticketService.GetAll();
+                if (!tickets.Any())
+                    return NotFound("No se encontraron tickets.");
+                return Ok(tickets);
             }
             catch (DatabaseException ex)
             {
@@ -40,12 +42,13 @@ namespace CineTup.Presentation.Controllers
             }
         }
 
+        [Authorize(Policy = Policies.AdminOnly)]
         [HttpGet("{id}")]
-        public ActionResult<MovieResponse> GetById([FromRoute] int id)
+        public ActionResult<TicketResponse> GetById([FromRoute] int id)
         {
             try
             {
-                return Ok(_movieService.GetById(id));
+                return Ok(_ticketService.GetById(id));
             }
             catch (NotFoundException ex)
             {
@@ -61,14 +64,30 @@ namespace CineTup.Presentation.Controllers
             }
         }
 
-        [Authorize(Policy = Policies.AdminOnly)]
-        [HttpPost]
-        public ActionResult<MovieResponse> Create([FromBody] MovieRequest movie)
+        [Authorize(Policy = Policies.ClientOnly)]
+        [HttpPost("{id}/buy")]
+        public ActionResult<TicketResponse> BuyTicket([FromRoute] int id)
         {
             try
             {
-                var createdMovie = _movieService.Create(movie);
-                return CreatedAtAction(nameof(GetById), new { id = createdMovie.Id }, createdMovie);
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                                  ?? User.FindFirst("sub")?.Value;
+
+                if (userIdClaim == null || !int.TryParse(userIdClaim, out int clientId))
+                {
+                    return Unauthorized("No se pudo identificar al cliente.");
+                }
+
+                var ticket = _ticketService.BuyTicket(id, clientId);
+                return Ok(ticket);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ex.Message);
             }
             catch (DatabaseException ex)
             {
@@ -80,18 +99,13 @@ namespace CineTup.Presentation.Controllers
             }
         }
 
-        [Authorize(Policy = Policies.AdminOnly)]
-        [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] int id)
+        [HttpGet("showtime/{showTimeId}/available")]
+        public ActionResult<List<TicketResponse>> GetAvailableTickets([FromRoute] int showTimeId)
         {
             try
             {
-                _movieService.Delete(id);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
+                var tickets = _ticketService.GetAvailableTickets(showTimeId);
+                return Ok(tickets);
             }
             catch (DatabaseException ex)
             {
@@ -101,29 +115,6 @@ namespace CineTup.Presentation.Controllers
             {
                 return StatusCode(500, "Ocurrió un error inesperado.");
             }
-        }
-
-        [Authorize(Policy = Policies.AdminOnly)]
-        [HttpPut("{id}")]
-        public ActionResult Update([FromBody] MovieRequest movie, [FromRoute] int id)
-        {
-            try
-            {
-                _movieService.Update(movie, id);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
-        }
         }
     }
+}

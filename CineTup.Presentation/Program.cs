@@ -1,4 +1,4 @@
-﻿using CineTup.Application.Abstractions;
+using CineTup.Application.Abstractions;
 using CineTup.Presentation.Authorization;
 using CineTup.Application.Abstractions.Infraestructure;
 using CineTup.Application.Services;
@@ -53,6 +53,7 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddAuthorization(options =>
 {

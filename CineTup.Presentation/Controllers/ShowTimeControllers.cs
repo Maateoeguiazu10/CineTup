@@ -36,6 +36,10 @@ namespace CineTup.Presentation.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado.");
+            }
         }
 
         [HttpGet("{id}")]
@@ -52,7 +56,11 @@ namespace CineTup.Presentation.Controllers
             catch (DatabaseException ex)
             {
                 return StatusCode(500, ex.Message);
-            } 
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado.");
+            }
         }
 
         [Authorize(Policy = Policies.AdminOnly)]
@@ -67,6 +75,10 @@ namespace CineTup.Presentation.Controllers
             catch (DatabaseException ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado.");
             }
         }
         
@@ -86,6 +98,10 @@ namespace CineTup.Presentation.Controllers
             catch (DatabaseException ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado.");
             }
         }
 
@@ -107,6 +123,10 @@ namespace CineTup.Presentation.Controllers
             catch (DatabaseException ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado.");
             }
         }
     }

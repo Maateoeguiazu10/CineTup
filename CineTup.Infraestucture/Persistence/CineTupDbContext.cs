@@ -1,4 +1,4 @@
-﻿using CineTup.Domain.Entities;
+using CineTup.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

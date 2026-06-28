@@ -50,13 +50,13 @@ namespace CineTup.Infraestucture.Persistence.Repository
             var entity = GetById(id);
             if (entity != null)
             {
-               entity.IsDeleted = true;
-               entity.DeletedDateTime = DateTime.UtcNow;
-               entity.UpdateDateTime = DateTime.UtcNow;
-               _dbSet.Update(entity);
-               SaveChanges();
+                entity.IsDeleted = true;
+                entity.DeletedDateTime = DateTime.UtcNow;
+                entity.UpdateDateTime = DateTime.UtcNow;
+                _dbSet.Update(entity);
+                SaveChanges();
 
-                
+
             }
         }
         protected void SaveChanges()
@@ -70,5 +70,5 @@ namespace CineTup.Infraestucture.Persistence.Repository
                 throw new DatabaseException("Error al acceder a la base de datos.", ex);
             }
         }
+    }
 }
-
