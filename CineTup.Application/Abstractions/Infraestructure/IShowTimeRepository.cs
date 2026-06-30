@@ -7,6 +7,6 @@ namespace CineTup.Application.Abstractions.Infraestructure
 {
     public interface IShowTimeRepository : IBaseRepository<ShowTime>
     {
-        bool ExistsOverlappingShowTime(DateTime startTime, DateTime endTime);
+        Task<bool> ExistsOverlappingShowTimeAsync(int movieId, DateTime startTime, DateTime endTime, int? excludeShowTimeId = null);
     }
 }

@@ -5,10 +5,10 @@ namespace CineTup.Application.Abstractions
 {
     public interface IShowTimeService
     {
-        List<ShowTimeResponse> GetAll();
-        ShowTimeResponse GetById(int id);
-        ShowTimeResponse Create(ShowTimeRequest request);
-        void Update(ShowTimeRequest request, int id);
-        void Delete(int id);
+        Task<List<ShowTimeResponse>> GetAllAsync();
+        Task<ShowTimeResponse> GetByIdAsync(int id);
+        Task<ShowTimeResponse> CreateAsync(ShowTimeRequest request);
+        Task UpdateAsync(ShowTimeRequest request, int id);
+        Task DeleteAsync(int id);
     }
 }

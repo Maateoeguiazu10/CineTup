@@ -7,10 +7,10 @@ namespace CineTup.Application.Abstractions
 {
     public interface ITicketService
     {
-        List<TicketResponse> GetAll();
-        TicketResponse GetById(int id);
-        void Delete(int id);
-        TicketResponse BuyTicket(int ticketId, int clientId);
-        List<TicketResponse> GetAvailableTickets(int showTimeId);
+        Task<List<TicketResponse>> GetAllAsync();
+        Task<TicketResponse> GetByIdAsync(int id);
+        Task DeleteAsync(int id);
+        Task<TicketResponse> BuyTicketAsync(int ticketId, int clientId);
+        Task<List<TicketResponse>> GetAvailableTicketsAsync(int showTimeId);
     }
 }

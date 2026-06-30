@@ -12,41 +12,54 @@ namespace CineTup.Application.Services
     {
         private readonly IShowTimeRepository _showTimeRepository;
         private readonly ITicketRepository _ticketRepository;
+        private readonly IMovieRepository _movieRepository;
 
         public ShowTimeService(
             IShowTimeRepository showTimeRepository,
-            ITicketRepository ticketRepository)
+            ITicketRepository ticketRepository,
+            IMovieRepository movieRepository)
         {
             _showTimeRepository = showTimeRepository;
             _ticketRepository = ticketRepository;
+            _movieRepository = movieRepository;
         }
 
-        public List<ShowTimeResponse> GetAll()
+        public async Task<List<ShowTimeResponse>> GetAllAsync()
         {
-            return _showTimeRepository
-                .GetAll()
+            var showTimes = await _showTimeRepository.GetAllAsync();
+            return showTimes
                 .OrderBy(x => x.StartTime)
                 .Select(x => x.ToShowTimeResponse())
                 .ToList();
         }
 
-        public ShowTimeResponse GetById(int id)
+        public async Task<ShowTimeResponse> GetByIdAsync(int id)
         {
-            var showTime = _showTimeRepository.GetById(id);
+            var showTime = await _showTimeRepository.GetByIdAsync(id);
             if (showTime == null)
                 throw new NotFoundException("No se encontro la funcion con id '{id}'");
             return showTime.ToShowTimeResponse();
         }
 
-        public ShowTimeResponse Create(ShowTimeRequest request)
+        public async Task<ShowTimeResponse> CreateAsync(ShowTimeRequest request)
         {
+            var movie = await _movieRepository.GetByIdAsync(request.MovieId);
+            if (movie == null)
+                throw new NotFoundException("No se encontró la película especificada.");
+
+            var startTime = request.StartTime!.Value;
+            var endTime = startTime.AddMinutes(movie.Duration);
+
+            if (await _showTimeRepository.ExistsOverlappingShowTimeAsync(request.MovieId, startTime, endTime))
+                throw new ValidationException("La función se superpone con otra existente para esta película.");
+
             var newShowTime = request.ToShowTime();
 
-            _showTimeRepository.Add(newShowTime);
+            var createdShowTime = await _showTimeRepository.AddAsync(newShowTime);
 
             for (int seat = 1; seat <= 30; seat++)
             {
-                _ticketRepository.Add(new Ticket
+                await _ticketRepository.AddAsync(new Ticket
                 {
                     ShowTimeId = newShowTime.Id,
                     SeatNumber = seat,
@@ -57,28 +70,38 @@ namespace CineTup.Application.Services
             return newShowTime.ToShowTimeResponse();
         }
 
-        public void Update(ShowTimeRequest request, int id)
+        public async Task UpdateAsync(ShowTimeRequest request, int id)
         {
-            var showTimeToUpdate = _showTimeRepository.GetById(id);
+            var showTimeToUpdate = await _showTimeRepository.GetByIdAsync(id);
 
             if (showTimeToUpdate == null)
                 throw new NotFoundException("No se encontro la funcion con id '{id}'");
 
+            var movie = await _movieRepository.GetByIdAsync(request.MovieId);
+            if (movie == null)
+                throw new NotFoundException("No se encontró la película especificada.");
+
+            var startTime = request.StartTime!.Value;
+            var endTime = startTime.AddMinutes(movie.Duration);
+
+            if (await _showTimeRepository.ExistsOverlappingShowTimeAsync(request.MovieId, startTime, endTime, id))
+                throw new ValidationException("La función se superpone con otra existente para esta película.");
+
             showTimeToUpdate.MovieId = request.MovieId;
-            showTimeToUpdate.StartTime = request.StartTime;
+            showTimeToUpdate.StartTime = startTime;
             showTimeToUpdate.TicketPrice = request.TicketPrice;
 
-            _showTimeRepository.Update(showTimeToUpdate);
+            await _showTimeRepository.UpdateAsync(showTimeToUpdate);
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var showTime = _showTimeRepository.GetById(id);
+            var showTime = await _showTimeRepository.GetByIdAsync(id);
 
             if (showTime == null)
                 throw new NotFoundException("No se encontro la funcion con id '{id}'");
 
-            _showTimeRepository.Delete(id);
+            await _showTimeRepository.DeleteAsync(id);
         }
     }
 }

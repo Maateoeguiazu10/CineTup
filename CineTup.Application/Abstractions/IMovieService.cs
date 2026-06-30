@@ -8,11 +8,11 @@ namespace CineTup.Application.Abstractions
 {
     public interface IMovieService
     {
-        List<MovieResponse> GetAll();
-        MovieResponse GetById(int id);
-        MovieResponse Create(MovieRequest movie);
-        void Update(MovieRequest movie, int id);
-        void Delete(int id);
+        Task<List<MovieResponse>> GetAllAsync();
+        Task<MovieResponse> GetByIdAsync(int id);
+        Task<MovieResponse> CreateAsync(MovieRequest movie);
+        Task UpdateAsync(MovieRequest movie, int id);
+        Task DeleteAsync(int id);
         
     }
 }

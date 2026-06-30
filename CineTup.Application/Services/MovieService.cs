@@ -18,45 +18,46 @@ namespace CineTup.Application.Services
         {
             _movieRepository = movieRepository;
         }
-        public List<MovieResponse> GetAll()
+        public async Task<List<MovieResponse>> GetAllAsync()
         {
-            return _movieRepository
-            .GetAll()
-            .OrderBy(x => x.Title)
-            .Select(x => x.ToMovieResponse()).ToList();
+            var movies = await _movieRepository.GetAllAsync();
+            return movies
+                .OrderBy(x => x.Title)
+                .Select(x => x.ToMovieResponse())
+                .ToList();
 
         }
 
-        public MovieResponse GetById(int id)
+        public async Task<MovieResponse> GetByIdAsync(int id)
         {
-            var movie = _movieRepository.GetById(id);
-            if (movie == null) 
+            var movie = await _movieRepository.GetByIdAsync(id);
+            if (movie == null)
                 throw new NotFoundException("Movie not found");
             return movie.ToMovieResponse();
         }
 
-        public MovieResponse Create(MovieRequest movie)
+        public async Task<MovieResponse> CreateAsync(MovieRequest movie)
         {
             var newMovie = movie.ToMovie();
-            _movieRepository.Add(newMovie);
-            return newMovie.ToMovieResponse();
+            var createdMovie = await _movieRepository.AddAsync(newMovie);
+            return createdMovie.ToMovieResponse();
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var movie = _movieRepository.GetById(id);
+            var movie = await _movieRepository.GetByIdAsync(id);
 
             if (movie == null)
-                throw new NotFoundException("No se encontro la pelicula con id '{id}'");
+                throw new NotFoundException("No se encontro la pelicula");
 
-            _movieRepository.Delete(id);
+            await _movieRepository.DeleteAsync(id);
         }
-        public void Update(MovieRequest movie, int id)
+        public async Task UpdateAsync(MovieRequest movie, int id)
         {
-            var movieToUpdate = _movieRepository.GetById(id);
+            var movieToUpdate = await _movieRepository.GetByIdAsync(id);
 
             if (movieToUpdate == null)
-                throw new NotFoundException("No se encontro la pelicula con id '{id}'");
+                throw new NotFoundException("No se encontro la pelicula");
 
 
             movieToUpdate.Title = movie.Title;
@@ -70,7 +71,7 @@ namespace CineTup.Application.Services
             movieToUpdate.IsAvailable = movie.IsAvailable;
 
 
-            _movieRepository.Update(movieToUpdate);
+            await _movieRepository.UpdateAsync(movieToUpdate);
         }
     }
 }

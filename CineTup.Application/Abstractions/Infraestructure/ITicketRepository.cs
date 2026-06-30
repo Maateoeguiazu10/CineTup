@@ -7,7 +7,7 @@ namespace CineTup.Application.Abstractions.Infraestructure
 {
     public interface ITicketRepository : IBaseRepository<Ticket>
     {
-        bool IsSeatSold(int showTimeId, int seatNumber);
-        List<Ticket> GetAvailableTickets(int showTimeId);
+        Task<bool> IsSeatSoldAsync(int showTimeId, int seatNumber);
+        Task<List<Ticket>> GetAvailableTicketsAsync(int showTimeId);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using CineTup.Application.Abstractions;
-using CineTup.Application.Exceptions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
 using CineTup.Presentation.Authorization;
@@ -21,109 +20,50 @@ namespace CineTup.Presentation.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<MovieResponse>> GetAll()
+        public async Task<ActionResult<List<MovieResponse>>> GetAllAsync()
         {
-            try
-            {
-                var movies = _movieService.GetAll();
-                if (!movies.Any())
-                    return NotFound("No se encontraron películas.");
-                return Ok(movies);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var movies = await _movieService.GetAllAsync();
+            if (!movies.Any())
+                return NotFound("No se encontraron películas.");
+            return Ok(movies);
         }
+      
 
         [HttpGet("{id}")]
-        public ActionResult<MovieResponse> GetById([FromRoute] int id)
+        public async Task<ActionResult<MovieResponse>> GetByIdAsync([FromRoute] int id)
         {
-            try
-            {
-                return Ok(_movieService.GetById(id));
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var movie = await _movieService.GetByIdAsync(id);
+            if (movie == null)
+                return NotFound("Película no encontrada.");
+            return Ok(movie);
         }
 
         [Authorize(Policy = Policies.AdminOnly)]
         [HttpPost]
-        public ActionResult<MovieResponse> Create([FromBody] MovieRequest movie)
+        public async Task<ActionResult<MovieResponse>> CreateAsync([FromBody] MovieRequest movie)
         {
-            try
-            {
-                var createdMovie = _movieService.Create(movie);
-                return CreatedAtAction(nameof(GetById), new { id = createdMovie.Id }, createdMovie);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var createdMovie = await _movieService.CreateAsync(movie);
+            return CreatedAtAction(
+                actionName: "GetById",
+                routeValues: new { id = createdMovie.Id },
+                value: createdMovie);
         }
+
 
         [Authorize(Policy = Policies.AdminOnly)]
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] int id)
+        public async Task<ActionResult> DeleteAsync([FromRoute] int id)
         {
-            try
-            {
-                _movieService.Delete(id);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            await _movieService.DeleteAsync(id);
+            return NoContent();
         }
 
         [Authorize(Policy = Policies.AdminOnly)]
         [HttpPut("{id}")]
-        public ActionResult Update([FromBody] MovieRequest movie, [FromRoute] int id)
+        public async Task<ActionResult> UpdateAsync([FromBody] MovieRequest movie, [FromRoute] int id)
         {
-            try
-            {
-                _movieService.Update(movie, id);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
-        }
+            await _movieService.UpdateAsync(movie, id);
+            return NoContent();
         }
     }
+}

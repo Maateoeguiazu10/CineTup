@@ -20,9 +20,9 @@ namespace CineTup.Infraestucture.ExternalServices
             _context = context;
         }
 
-        public List<UserResponse> GetAllUsers()
+        public async Task<List<UserResponse>> GetAllUsersAsync()
         {
-            var clients = _context.Clients
+            var clients = await _context.Clients
                 .Where(c => !c.IsDeleted)
                 .Select(c => new UserResponse
                 {
@@ -31,9 +31,9 @@ namespace CineTup.Infraestucture.ExternalServices
                     Email = c.Email,
                     AvatarUrl = c.AvatarUrl,
                     Rol = "Client"
-                }).ToList();
+                }).ToListAsync();
 
-            var admins = _context.Admins
+            var admins = await _context.Admins
                 .Where(a => !a.IsDeleted)
                 .Select(a => new UserResponse
                 {
@@ -42,9 +42,9 @@ namespace CineTup.Infraestucture.ExternalServices
                     Email = a.Email,
                     AvatarUrl = a.AvatarUrl,
                     Rol = "Admin"
-                }).ToList();
+                }).ToListAsync();
 
-            var sysAdmins = _context.SysAdmins
+            var sysAdmins = await _context.SysAdmins
                 .Where(s => !s.IsDeleted)
                 .Select(s => new UserResponse
                 {
@@ -53,12 +53,12 @@ namespace CineTup.Infraestucture.ExternalServices
                     Email = s.Email,
                     AvatarUrl = s.AvatarUrl,
                     Rol = "SysAdmin"
-                }).ToList();
+                }).ToListAsync();
 
             return clients.Concat(admins).Concat(sysAdmins).ToList();
         }
 
-        public void AssignRole(int userId, string currentRole, string newRole)
+        public async Task AssignRoleAsync(int userId, string currentRole, string newRole)
         {
             if (string.Equals(currentRole, newRole, StringComparison.OrdinalIgnoreCase))
             {
@@ -134,7 +134,6 @@ namespace CineTup.Infraestucture.ExternalServices
                         throw new ConflictException("Ya existe un usuario con ese email en el rol de destino.");
                     }
 
-                    // 2. Crear y guardar en el nuevo rol
                     User targetUser;
                     if (string.Equals(newRole, "Client", StringComparison.OrdinalIgnoreCase))
                     {
@@ -181,9 +180,9 @@ namespace CineTup.Infraestucture.ExternalServices
             }
         }
 
-        public void DeleteUser(int userId)
+        public async Task DeleteUserAsync(int userId)
         {
-            var client = _context.Clients.FirstOrDefault(u => u.Id == userId && !u.IsDeleted);
+            var client = await _context.Clients.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
             if (client != null)
             {
                 client.IsDeleted = true;
@@ -192,7 +191,7 @@ namespace CineTup.Infraestucture.ExternalServices
                 return;
             }
 
-            var admin = _context.Admins.FirstOrDefault(u => u.Id == userId && !u.IsDeleted);
+            var admin = await _context.Admins.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
             if (admin != null)
             {
                 admin.IsDeleted = true;
@@ -201,7 +200,7 @@ namespace CineTup.Infraestucture.ExternalServices
                 return;
             }
 
-            var sysAdmin = _context.SysAdmins.FirstOrDefault(u => u.Id == userId && !u.IsDeleted);
+            var sysAdmin = await _context.SysAdmins.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
             if (sysAdmin != null)
             {
                 sysAdmin.IsDeleted = true;

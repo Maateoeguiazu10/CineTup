@@ -1,5 +1,6 @@
 using CineTup.Application.Abstractions;
 using CineTup.Presentation.Authorization;
+using CineTup.Presentation.Middlewares;
 using CineTup.Application.Abstractions.Infraestructure;
 using CineTup.Application.Services;
 using CineTup.Infraestucture.ExternalServices;
@@ -94,6 +95,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

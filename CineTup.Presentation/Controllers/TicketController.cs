@@ -23,11 +23,11 @@ namespace CineTup.Presentation.Controllers
 
         [Authorize(Policy = Policies.AdminOnly)]
         [HttpGet]
-        public ActionResult<List<TicketResponse>> GetAll()
+        public async Task<ActionResult<List<TicketResponse>>> GetAllAsync()
         {
             try
             {
-                var tickets = _ticketService.GetAll();
+                var tickets = await _ticketService.GetAllAsync();
                 if (!tickets.Any())
                     return NotFound("No se encontraron tickets.");
                 return Ok(tickets);
@@ -44,77 +44,34 @@ namespace CineTup.Presentation.Controllers
 
         [Authorize(Policy = Policies.AdminOnly)]
         [HttpGet("{id}")]
-        public ActionResult<TicketResponse> GetById([FromRoute] int id)
+        public async Task<ActionResult<TicketResponse>> GetByIdAsync([FromRoute] int id)
         {
-            try
-            {
-                return Ok(_ticketService.GetById(id));
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var ticket = await _ticketService.GetByIdAsync(id);
+            if (ticket == null)
+                return NotFound("Ticket no encontrado.");
+            return Ok(ticket);
+
         }
 
         [Authorize(Policy = Policies.ClientOnly)]
         [HttpPost("{id}/buy")]
-        public ActionResult<TicketResponse> BuyTicket([FromRoute] int id)
+        public async Task<ActionResult<TicketResponse>> BuyTicketAsync([FromRoute] int id)
         {
-            try
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                ?? User.FindFirst("sub")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int clientId))
             {
-                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
-                                  ?? User.FindFirst("sub")?.Value;
-
-                if (userIdClaim == null || !int.TryParse(userIdClaim, out int clientId))
-                {
-                    return Unauthorized("No se pudo identificar al cliente.");
-                }
-
-                var ticket = _ticketService.BuyTicket(id, clientId);
-                return Ok(ticket);
+                return Unauthorized("No se pudo identificar al cliente.");
             }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (ConflictException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var ticket = await _ticketService.BuyTicketAsync(id, clientId);
+            return Ok(ticket);
         }
 
         [HttpGet("showtime/{showTimeId}/available")]
-        public ActionResult<List<TicketResponse>> GetAvailableTickets([FromRoute] int showTimeId)
+        public async Task<ActionResult<List<TicketResponse>>> GetAvailableTicketsAsync([FromRoute] int showTimeId)
         {
-            try
-            {
-                var tickets = _ticketService.GetAvailableTickets(showTimeId);
-                return Ok(tickets);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var tickets = await _ticketService.GetAvailableTicketsAsync(showTimeId);
+            return Ok(tickets);
         }
     }
 }

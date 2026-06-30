@@ -18,37 +18,37 @@ namespace CineTup.Application.Services
         {
             _ticketRepository = ticketRepository;
         }
-        public List<TicketResponse> GetAll()
+        public async Task<List<TicketResponse>> GetAllAsync()
         {
-            return _ticketRepository
-                .GetAll()
+            var tickets = await _ticketRepository.GetAllAsync();
+            return tickets
                 .Select(x => x.ToTicketResponse())
                 .ToList();
         }
 
-        public TicketResponse GetById(int id)
+        public async Task<TicketResponse> GetByIdAsync(int id)
         {
-            var ticket = _ticketRepository.GetById(id);
+            var ticket = await _ticketRepository.GetByIdAsync(id);
             if (ticket == null)
                 throw new NotFoundException("Ticket not found");
             return ticket.ToTicketResponse();
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var ticket = _ticketRepository.GetById(id);
+            var ticket = await _ticketRepository.GetByIdAsync(id);
 
             if (ticket == null)
                 throw new NotFoundException("Ticket not found");
 
 
-            _ticketRepository.Delete(id);
+            await _ticketRepository.DeleteAsync(id);
 
         }
 
-        public TicketResponse BuyTicket(int ticketId, int clientId)
+        public async Task<TicketResponse> BuyTicketAsync(int ticketId, int clientId)
         {
-            var ticket = _ticketRepository.GetById(ticketId);
+            var ticket = await _ticketRepository.GetByIdAsync(ticketId);
             if (ticket == null)
                 throw new NotFoundException("Ticket no encontrado.");
 
@@ -58,14 +58,14 @@ namespace CineTup.Application.Services
             ticket.IsAvailable = false;
             ticket.ClientId = clientId;
             ticket.PurchaseDate = DateTime.Now;
-            _ticketRepository.Update(ticket);
+            await _ticketRepository.UpdateAsync(ticket);
             return ticket.ToTicketResponse();
         }
 
-        public List<TicketResponse> GetAvailableTickets(int showTimeId)
+        public async Task<List<TicketResponse>> GetAvailableTicketsAsync(int showTimeId)
         {
-            return _ticketRepository
-                .GetAvailableTickets(showTimeId)
+            var tickets = await _ticketRepository.GetAvailableTicketsAsync(showTimeId);
+            return tickets
                 .Select(x => x.ToTicketResponse())
                 .ToList();
         }

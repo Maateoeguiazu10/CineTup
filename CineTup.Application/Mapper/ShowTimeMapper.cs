@@ -10,11 +10,11 @@ namespace CineTup.Application.Mapper
     public static class ShowTimeMapper
     {
         public static ShowTime ToShowTime(this ShowTimeRequest ShowTimeRequest)
-                    {
+        {
             return new ShowTime
             {
                 MovieId = ShowTimeRequest.MovieId,
-                StartTime = ShowTimeRequest.StartTime,
+                StartTime = ShowTimeRequest.StartTime!.Value,
                 TicketPrice = ShowTimeRequest.TicketPrice,
                 IsDeleted = false
             };

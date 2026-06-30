@@ -5,8 +5,8 @@ namespace CineTup.Application.Abstractions
 {
     public interface IUserService
     {
-        List<UserResponse> GetAllUsers();
-        void AssignRole(int userId, string currentRole, string newRole);
-        void DeleteUser(int userId);
+        Task<List<UserResponse>> GetAllUsersAsync();
+        Task AssignRoleAsync(int userId, string currentRole, string newRole);
+        Task DeleteUserAsync(int userId);
     }
 }

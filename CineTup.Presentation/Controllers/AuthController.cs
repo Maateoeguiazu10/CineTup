@@ -2,12 +2,8 @@ using CineTup.Application.Abstractions;
 using CineTup.Application.Exceptions;
 using CineTup.Application.Requests;
 using CineTup.Application.Responses;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using ValidationException = CineTup.Application.Exceptions.ValidationException;
 
 namespace CineTup.Presentation.Controllers
 {
@@ -25,52 +21,14 @@ namespace CineTup.Presentation.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> SingUp([FromBody] SignUpRequest request)
         {
-            try
-            {
-                var response = await _authService.SingUp(request);
-                return StatusCode(StatusCodes.Status201Created, response);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ConflictException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurrio un error inesperado");
-            }
+            var response = await _authService.SingUp(request);
+            return StatusCode(StatusCodes.Status201Created, response);
         }
         [HttpPost("signin")]
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> SingIn([FromBody] SignInRequest request)
         {
-            try
-            {
                 return Ok(await _authService.SingIn(request));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (UnauthorizedException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (DatabaseException ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ocurri� un error inesperado.");
-            }
         }
     }
 }

@@ -29,9 +29,28 @@ namespace CineTup.Infraestucture.ExternalServices
         }
         public async Task<AuthResponse> SingUp(SignUpRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                throw new ValidationException("El nombre es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                throw new ValidationException("El email es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                throw new ValidationException("La contraseña es obligatoria.");
+            }
+
             if (!Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                throw new ArgumentException($"El email '{request.Email}' no es válido.");
+                throw new ValidationException($"El email '{request.Email}' no es válido.");
+            }
+            if (request.Password.Length < 8)
+            {
+                throw new ValidationException("La contraseña debe tener al menos 8 caracteres.");
             }
             bool emailExists = _context.Clients.Any(c => c.Email == request.Email)
                            || _context.Admins.Any(a => a.Email == request.Email)
@@ -74,6 +93,16 @@ namespace CineTup.Infraestucture.ExternalServices
         }
         public async Task<AuthResponse> SingIn(SignInRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                throw new ValidationException("El email es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                throw new ValidationException("La contraseña es obligatoria.");
+            }
+
             int userId;
             string rol;
             string? avatarUrl = null;
@@ -83,7 +112,7 @@ namespace CineTup.Infraestucture.ExternalServices
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
                 {
-                    throw new UnauthorizedAccessException("Credenciales inválidas.");
+                    throw new UnauthorizedException("Credenciales inválidas.");
                 }
                 userId = client.Id;
                 rol = "Client";
@@ -96,7 +125,7 @@ namespace CineTup.Infraestucture.ExternalServices
                 {
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, admin.Password))
                     {
-                        throw new UnauthorizedAccessException("Credenciales inválidas.");
+                        throw new UnauthorizedException("Credenciales inválidas.");
                     }
                     userId = admin.Id;
                     rol = "Admin";
@@ -110,7 +139,7 @@ namespace CineTup.Infraestucture.ExternalServices
                     {
                         if (!BCrypt.Net.BCrypt.Verify(request.Password, sysAdmin.Password))
                         {
-                            throw new UnauthorizedAccessException("Credenciales inválidas.");
+                            throw new UnauthorizedException("Credenciales inválidas.");
                         }
                         userId = sysAdmin.Id;
                         rol = "SysAdmin";
@@ -118,7 +147,7 @@ namespace CineTup.Infraestucture.ExternalServices
                     }
                     else
                     {
-                        throw new UnauthorizedAccessException("Credenciales inválidas.");
+                        throw new UnauthorizedException("Credenciales inválidas.");
                     }
                 }
             }

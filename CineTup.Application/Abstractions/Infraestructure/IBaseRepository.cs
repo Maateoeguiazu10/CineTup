@@ -6,10 +6,10 @@ namespace CineTup.Application.Abstractions.Infraestructure
 {
     public interface IBaseRepository<T> where T : class
     {
-        List<T> GetAll();
-        T? GetById(int id);
-        T Add(T entity);
-        void Update(T entity);
-        void Delete(int id);
+        Task<List<T>> GetAllAsync();
+        Task<T?> GetByIdAsync(int id);
+        Task<T> AddAsync(T entity);
+        Task UpdateAsync(T entity);
+        Task DeleteAsync(int id);
     }
 }
