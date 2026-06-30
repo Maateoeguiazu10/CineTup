@@ -9,7 +9,6 @@ using System.Collections.Generic;
 
 namespace CineTup.Presentation.Controllers
 {
-    [Authorize(Policy = Policies.SysAdminOnly)]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -30,6 +29,28 @@ namespace CineTup.Presentation.Controllers
                 if (users == null || users.Count == 0)
                     return NotFound("No se encontraron usuarios.");
                 return Ok(users);
+            }
+            catch (DatabaseException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Ocurrió un error inesperado.");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            try
+            {
+                _userService.DeleteUser(id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (DatabaseException ex)
             {

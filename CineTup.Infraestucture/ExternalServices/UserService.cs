@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace CineTup.Infraestucture.ExternalServices
 {
     public class UserService : IUserService
@@ -28,6 +29,7 @@ namespace CineTup.Infraestucture.ExternalServices
                     Id = c.Id,
                     Name = c.Name,
                     Email = c.Email,
+                    AvatarUrl = c.AvatarUrl,
                     Rol = "Client"
                 }).ToList();
 
@@ -38,6 +40,7 @@ namespace CineTup.Infraestucture.ExternalServices
                     Id = a.Id,
                     Name = a.Name,
                     Email = a.Email,
+                    AvatarUrl = a.AvatarUrl,
                     Rol = "Admin"
                 }).ToList();
 
@@ -48,6 +51,7 @@ namespace CineTup.Infraestucture.ExternalServices
                     Id = s.Id,
                     Name = s.Name,
                     Email = s.Email,
+                    AvatarUrl = s.AvatarUrl,
                     Rol = "SysAdmin"
                 }).ToList();
 
@@ -175,6 +179,38 @@ namespace CineTup.Infraestucture.ExternalServices
                     throw;
                 }
             }
+        }
+
+        public void DeleteUser(int userId)
+        {
+            var client = _context.Clients.FirstOrDefault(u => u.Id == userId && !u.IsDeleted);
+            if (client != null)
+            {
+                client.IsDeleted = true;
+                client.DeletedDateTime = DateTime.UtcNow;
+                _context.SaveChanges();
+                return;
+            }
+
+            var admin = _context.Admins.FirstOrDefault(u => u.Id == userId && !u.IsDeleted);
+            if (admin != null)
+            {
+                admin.IsDeleted = true;
+                admin.DeletedDateTime = DateTime.UtcNow;
+                _context.SaveChanges();
+                return;
+            }
+
+            var sysAdmin = _context.SysAdmins.FirstOrDefault(u => u.Id == userId && !u.IsDeleted);
+            if (sysAdmin != null)
+            {
+                sysAdmin.IsDeleted = true;
+                sysAdmin.DeletedDateTime = DateTime.UtcNow;
+                _context.SaveChanges();
+                return;
+            }
+
+            throw new NotFoundException("Usuario no encontrado.");
         }
     }
 }

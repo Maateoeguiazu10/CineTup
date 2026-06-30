@@ -55,6 +55,15 @@ builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddHttpClient<ITmdbService, TmdbService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Tmdb:ApiBaseUrl"]!);
+    client.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer",
+            builder.Configuration["Tmdb:BearerToken"]!);
+});
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("Admin"));

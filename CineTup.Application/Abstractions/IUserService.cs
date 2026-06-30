@@ -7,5 +7,6 @@ namespace CineTup.Application.Abstractions
     {
         List<UserResponse> GetAllUsers();
         void AssignRole(int userId, string currentRole, string newRole);
+        void DeleteUser(int userId);
     }
 }

@@ -8,7 +8,7 @@ namespace CineTup.Application.Abstractions
 {
     public interface IAuthService
     {
-        AuthResponse SingUp(SignUpRequest request);
-        AuthResponse SingIn(SignInRequest request);
+        Task<AuthResponse> SingUp(SignUpRequest request);
+        Task<AuthResponse> SingIn(SignInRequest request);
     }
 }

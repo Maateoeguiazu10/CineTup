@@ -6,7 +6,6 @@ using CineTup.Domain.Entities;
 using CineTup.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -21,12 +20,14 @@ namespace CineTup.Infraestucture.ExternalServices
     {
         private readonly CineTupDbContext _context;
         private readonly IConfiguration _configuration;
-        public AuthService(CineTupDbContext context, IConfiguration configuration)
+        private readonly ITmdbService _tmdbService;
+        public AuthService(CineTupDbContext context, IConfiguration configuration, ITmdbService tmdbService)
         {
             _context = context;
             _configuration = configuration;
+            _tmdbService = tmdbService;
         }
-        public AuthResponse SingUp(SignUpRequest request)
+        public async Task<AuthResponse> SingUp(SignUpRequest request)
         {
             if (!Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
@@ -41,36 +42,17 @@ namespace CineTup.Infraestucture.ExternalServices
             }
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            User user;
-            string rol;
 
-            // Restricción de seguridad: los registros públicos por defecto crean "Client".
-            // Para inicializar el sistema, si no existe ningún SysAdmin en la DB, se permite crear el primero.
-            bool hasSysAdmins = _context.SysAdmins.Any();
-            if (!hasSysAdmins && request.Rol == "SysAdmin")
+            var user = new Client
             {
-                var sysAdmin = new SysAdmin
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Password = hashedPassword
-                };
-                user = sysAdmin;
-                _context.SysAdmins.Add(sysAdmin);
-                rol = "SysAdmin";
-            }
-            else
-            {
-                var client = new Client
-                {
-                    Name = request.Name,
-                    Email = request.Email,
-                    Password = hashedPassword
-                };
-                user = client;
-                _context.Clients.Add(client);
-                rol = "Client";
-            }
+                Name = request.Name,
+                Email = request.Email,
+                Password = hashedPassword
+            };
+            _context.Clients.Add(user);
+            string? avatarUrl = await _tmdbService.GetRandomMoviePosterAsync();
+            user.AvatarUrl = avatarUrl;
+
             try
             {
                 _context.SaveChanges();
@@ -83,18 +65,20 @@ namespace CineTup.Infraestucture.ExternalServices
 
             return new AuthResponse
             {
-                Token = GenerateToken(userId, request.Email, rol),
-                Rol = rol,
+                Token = GenerateToken(userId, request.Email, "Client"),
+                Rol = "Client",
                 UserId = userId,
-                Email = request.Email
+                Email = request.Email,
+                AvatarUrl = avatarUrl
             };
         }
-        public AuthResponse SingIn(SignInRequest request)
+        public async Task<AuthResponse> SingIn(SignInRequest request)
         {
             int userId;
             string rol;
+            string? avatarUrl = null;
 
-            var client = _context.Clients.FirstOrDefault(c => c.Email == request.Email);
+            var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == request.Email);
             if (client != null)
             {
                 if (!BCrypt.Net.BCrypt.Verify(request.Password, client.Password))
@@ -103,10 +87,11 @@ namespace CineTup.Infraestucture.ExternalServices
                 }
                 userId = client.Id;
                 rol = "Client";
+                avatarUrl = client.AvatarUrl;
             }
             else
             {
-                var admin = _context.Admins.FirstOrDefault(a => a.Email == request.Email);
+                var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Email == request.Email);
                 if (admin != null)
                 {
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, admin.Password))
@@ -115,11 +100,12 @@ namespace CineTup.Infraestucture.ExternalServices
                     }
                     userId = admin.Id;
                     rol = "Admin";
+                    avatarUrl = admin.AvatarUrl;
 
                 }
                 else
                 {
-                    var sysAdmin = _context.SysAdmins.FirstOrDefault(u => u.Email == request.Email);
+                    var sysAdmin = await _context.SysAdmins.FirstOrDefaultAsync(u => u.Email == request.Email);
                     if (sysAdmin != null)
                     {
                         if (!BCrypt.Net.BCrypt.Verify(request.Password, sysAdmin.Password))
@@ -128,6 +114,7 @@ namespace CineTup.Infraestucture.ExternalServices
                         }
                         userId = sysAdmin.Id;
                         rol = "SysAdmin";
+                        avatarUrl = sysAdmin.AvatarUrl;
                     }
                     else
                     {
@@ -140,7 +127,8 @@ namespace CineTup.Infraestucture.ExternalServices
                 Token = GenerateToken(userId, request.Email, rol),
                 Rol = rol,
                 UserId = userId,
-                Email = request.Email
+                Email = request.Email,
+                AvatarUrl = avatarUrl
             };
         }
         private string GenerateToken(int userId, string email, string rol)

@@ -23,11 +23,11 @@ namespace CineTup.Presentation.Controllers
 
         [HttpPost("signup")]
         [AllowAnonymous]
-        public ActionResult<AuthResponse> SingUp([FromBody] SignUpRequest request)
+        public async Task<ActionResult<AuthResponse>> SingUp([FromBody] SignUpRequest request)
         {
             try
             {
-                var response = _authService.SingUp(request);
+                var response = await _authService.SingUp(request);
                 return StatusCode(StatusCodes.Status201Created, response);
             }
             catch (ArgumentException ex)
@@ -49,11 +49,11 @@ namespace CineTup.Presentation.Controllers
         }
         [HttpPost("signin")]
         [AllowAnonymous]
-        public ActionResult<AuthResponse> SingIn([FromBody] SignInRequest request)
+        public async Task<ActionResult<AuthResponse>> SingIn([FromBody] SignInRequest request)
         {
             try
             {
-                return Ok(_authService.SingIn(request));
+                return Ok(await _authService.SingIn(request));
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -69,7 +69,7 @@ namespace CineTup.Presentation.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Ocurrió un error inesperado.");
+                return StatusCode(500, "Ocurriï¿½ un error inesperado.");
             }
         }
     }

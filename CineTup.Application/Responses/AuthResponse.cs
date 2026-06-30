@@ -10,6 +10,6 @@ namespace CineTup.Application.Responses
         public string Rol { get; set; } = string.Empty;
         public int UserId { get; set; }
         public string Email { get; set; } = string.Empty;
-
+        public string? AvatarUrl { get; set; }
     }
 }
